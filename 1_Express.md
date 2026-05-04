@@ -18,9 +18,9 @@
 
 ##### 1) 라우팅이란?
 ```
-클라이언트가 특정 URI(엔드포인트)로 요청을 보내면, 서버거 그 요청을 받아서 처리하는 방식을 정의하는 것이다.
+클라이언트가 특정 URI(엔드포인트)로 요청을 보내면, 서버가 그 요청을 받아서 처리하는 방식을 정의하는 것이다.
 
-예) http://localhost:8080/list  --> /list 요청에 따른 라우팅 진행
+예) http://localhost:8080/list  --> GET 메소드, /list 요청에 따른 라우팅 진행
 ```
 
 ##### 2) 라우팅 정의
@@ -59,22 +59,22 @@ const app = express()
 
 //데이터 요청(R)
 app.get('/get', function(req, res, next) {
-            res.send(...)
+			res.send(...)
 })
 
 //데이터 생성(C)
 app.post('/post', function(req, res, next) {
-            res.send(...)
+			res.send(...)
 })
 
 //데이터 수정(U)
 app.put('/put', function(req, res, next) {
-            res.send(...)
+			res.send(...)
 })
 
 //데이터 삭제(D)
 app.delete('/delete', function(req, res, next) {
-            res.send(...)
+			res.send(...)
 })
 
 
@@ -93,7 +93,7 @@ app.listen(8080)
 
 클라이언트 요청 → [미들웨어1] → [미들웨어2] → [미들웨어3] → 라우터 → 클라이언트
 
-next()를 호출해야 다음 미들웨어로 넘어갑니다.
+next()를 호출해야 다음 미들웨어로 넘어감, next() 생략시 자동으로 다음으로 이동
 
 🎯 기본 구조
     app.use((req, res, next) => {
@@ -101,3 +101,77 @@ next()를 호출해야 다음 미들웨어로 넘어갑니다.
     next(); // 다음 미들웨어로 전달
     });
 ```
+
+##### 3) 미들웨어 종류
+1️⃣ app.use(express.json())
+```
+- 역할 : JSON 형식으로 데이터를 보냈을 때
+- 사용 : REST API(fetch, axios 등으로 보내는 JSON 데이터)
+- Content-Type : application/json
+```
+
+- 클라이언트 JSON
+
+```jsx
+// 클라이언트가 이렇게 보내면:
+fetch('/api', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: '홍길동' })
+});
+```
+
+- 서버
+
+```jsx
+// 서버에서 req.body로 접근 가능:
+app.use(express.json())
+
+app.post('/api', (req, res) => {
+  console.log(req.body.name); // '홍길동'
+});
+```
+
+2️⃣ app.use(express.urlencoded({ extended: false }))
+```
+- 역할 : HTML Form 형식으로 데이터를 보냈을 때
+- 사용 : <form method="POST"> 전송 시
+- Content-Type : application/x-www-form-urlencoded
+```
+
+- 클라이언트 Form
+
+```css
+<!-- HTML Form -->
+<form action="/login" method="POST">
+  <input name="username" />
+  <input name="password" type="password" />
+  <button>로그인</button>
+</form>
+```
+
+- 서버
+
+```css
+app.use(express.urlencoded({ extended: false }))
+
+app.post('/login', (req, res) => {
+  console.log(req.body.username); // form 입력값
+});
+```
+
+3️⃣ app.use(express.static('public'))
+```
+- 역할 : 정적 파일을 자동으로 제공
+- 사용 : HTML, CSS, 이미지, JS 파일 
+- 폴더 : 프로젝트 루트의 public/ 폴더
+```
+
+프로젝트/
+├── public/
+│   ├── index.html   → http://localhost:3000/index.html
+│   ├── style.css    → http://localhost:3000/style.css
+│   └── logo.png     → http://localhost:3000/logo.png
+└── app.js
+
+
